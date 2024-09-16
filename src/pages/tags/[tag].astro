@@ -1,0 +1,74 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import BlogPost from "../../components/BlogPost.astro";
+
+export async function getStaticPaths() {
+  const allPosts = await Astro.glob("../posts/*.md");
+
+  /**
+   * EJEMPLO PARA CREAR RUTAS DE MANERA MANUAL CON LOS TAGS QUE DEBERIAN TENER LAS ENTRADAS DE LOS BLOGS
+   * SI EL TAG NO EXISTE SE NAVEGARA HASTA LA PAGINA DEL 404
+   */
+
+  /* 
+  return [
+    { params: { tag: "astro" }, props: { posts: allPosts } },
+    { params: { tag: "éxitos" }, props: { posts: allPosts } },
+    { params: { tag: "comunidad" }, props: { posts: allPosts } },
+    { params: { tag: "bloguear" }, props: { posts: allPosts } },
+    { params: { tag: "contratiempos" }, props: { posts: allPosts } },
+    { params: { tag: "aprender en público" }, props: { posts: allPosts } },
+  ];
+  */
+
+  /**
+   * EJEMPLO DE COMO REALIZAR EL MISMO PROCESO DE FORMA MAS AUTOMATIZADA
+   */
+
+  const uniqueTags = [
+    ...new Set(allPosts.map((post) => post.frontmatter.tags).flat()),
+  ];
+
+  return uniqueTags.map((tag) => {
+    const filteredPosts = allPosts.filter((post) =>
+      post.frontmatter.tags.includes(tag)
+    );
+    return {
+      params: { tag },
+      props: { posts: filteredPosts },
+    };
+  });
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+
+/**
+ * EJEMPLO DE PARA RECORRER LOS TAGS MANUAL
+ */
+
+/*
+const filteredPosts = posts.filter((post) =>
+  post.frontmatter.tags?.includes(tag)
+);
+*/
+---
+
+<BaseLayout pageTitle={tag}>
+  <p>Entradas etiquetadas con {tag}</p>
+  <ul>
+    {
+      /**
+       * EJEMPLO DE PARA RECORRER LOS TAGS MANUAL
+       */
+      /*
+      filteredPosts.map((post) => (
+        <BlogPost url={post.url} title={post.frontmatter.title} />
+      ))
+      */
+      posts.map((post) => (
+        <BlogPost url={post.url} title={post.frontmatter.title} />
+      ))
+    }
+  </ul>
+</BaseLayout>
